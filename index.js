@@ -1,6 +1,7 @@
 
-if(window.maptalks){
-    window.maptalks.MBTileLayer=require('./src/MBTileLayer')
-}
+import MBTileLayer from "./src/MBTileLayer";
 
+export {
+    MBTileLayer
+}
 
