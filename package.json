@@ -1,6 +1,6 @@
 {
   "name": "maptalks-mbtilelayer",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "maptalks Loads .mbtiles tilesets.",
   "main": "dist/maptalks-mbtilelayer.js",
   "module": "dist/maptalks-mbtilelayer.es.js",
