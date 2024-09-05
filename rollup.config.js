@@ -8,7 +8,7 @@ import pkg from './package.json';
 const path = require('path');
 
 const product = process.env.NODE_ENV.trim() === 'prd';
-const sourceMap = !product;
+// const sourceMap = !product;
 const FILEMANE = pkg.name;
 const banner = `/*!\n * ${pkg.name} v${pkg.version}\n  */`;
 const external = ['maptalks'];
@@ -38,7 +38,7 @@ let output = [
             format: 'umd',
             name: 'maptalks',
             file: `dist/${FILEMANE}.js`,
-            sourcemap: sourceMap,
+            sourcemap: true,
             extend: true,
             banner: banner,
             globals
