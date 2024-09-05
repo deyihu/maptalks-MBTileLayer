@@ -1,36 +1,63 @@
 <!DOCTYPE html>
 <html>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>maptalks  Loads .mbtiles tilesets.</title>
-  <style type="text/css">
-    html,body{margin:0px;height:100%;width:100%}
-    .container{width:100%;height:100%}
-  </style>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks@0.39.0/dist/maptalks.css">
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks@0.39.0/dist/maptalks.min.js"></script>
-  <script src="https://unpkg.com/sql.js@0.3.2/js/sql.js"></script>
-  <script src="../dist/maptalks-mbtilelayer.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>maptalks Loads .mbtiles tilesets.</title>
+<style type="text/css">
+  html,
+  body {
+    margin: 0px;
+    height: 100%;
+    width: 100%
+  }
 
-  <body>
-    <div id="map" class="container"></div>
+  .container {
+    width: 100%;
+    height: 100%
+  }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sql.js@0.3.2/js/sql.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/maptalks-mbtilelayer@latest/dist/maptalks-mbtilelayer.min.js"></script>
+<script src="../dist/maptalks-mbtilelayer.js"></script>
 
-    <script>
-      var baseLayer = new maptalks.MBTileLayer('base',{
-        // urlTemplate: './countries-raster.mbtiles',
-        dbUrl:'./countries-raster.mbtiles',
-        attribution: '&copy; MapBox Maps'
-      });
+<body>
+  <div id="map" class="container"></div>
 
-    
-      var map = new maptalks.Map('map', {
-        center:     [0,0],
-        zoom:  0,
-        baseLayer : baseLayer
-      });
+  <script>
 
 
 
-    </script>
-  </body>
+    var map = new maptalks.Map('map', {
+      zoomControl: true,
+      center: [0, 0],
+      zoom: 0,
+    });
+
+    // const layer1 = new maptalks.TileLayer("base", {
+    //   zIndex:-1,
+    //   debug: true,
+    //   urlTemplate: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+    //   subdomains: ["a", "b", "c", "d"],
+    //   attribution: "&copy; <a href='http://osm.org'>OpenStreetMap</a> contributors, &copy; <a href='https://carto.com/'>CARTO</a>",
+    // }).addTo(map);
+
+    var baseLayer = new maptalks.MBTileLayer('base', {
+      // urlTemplate: './countries-raster.mbtiles',
+      dbUrl: './countries-raster.mbtiles',
+      attribution: '&copy; MapBox Maps',
+      debug: true,
+      repeatWorld: false,
+    });
+
+    baseLayer.on('dataload', e => {
+      baseLayer.addTo(map);
+    })
+
+
+
+  </script>
+</body>
+
 </html>
