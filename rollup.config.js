@@ -1,58 +1,79 @@
 // Rollup plugins
-import babel from 'rollup-plugin-babel';
+// import babel from 'rollup-plugin-babel';
 import nodeResolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
-import json from "rollup-plugin-json";
-const uglify = require('rollup-plugin-uglify').uglify;
-import pkg from "./package.json";
-
+import json from 'rollup-plugin-json';
+import { terser } from 'rollup-plugin-terser';
+import pkg from './package.json';
+const path = require('path');
 
 const product = process.env.NODE_ENV.trim() === 'prd';
-const FILEMANE = (product ? pkg.name + '.min' : pkg.name);
-const sourceMap = (product ? false : true);
-
-const banner = `/*\n * ${pkg.name} v${pkg.version}\n * this is extends maptalks.js \n * build by deyihu \n*/\n`;
+const sourceMap = !product;
+const FILEMANE = pkg.name;
+const banner = `/*!\n * ${pkg.name} v${pkg.version}\n  */`;
+const external = ['maptalks'];
+const globals = {
+    maptalks: 'maptalks'
+};
 
 const plugins = [
     json(),
     nodeResolve(),
-    commonjs(),
-    babel({
-        // exclude: ['node_modules/**']
-    })
+    commonjs()
+    // babel({
+    //     // exclude: ['node_modules/**']
+    // })
 ];
-const output = [
+
+function getEntry() {
+    return path.join(__dirname, './index.js');
+}
+
+let output = [
     {
-        'format': 'umd',
-        'name': 'maptalks',
-        'file': `dist/${FILEMANE}.js`,
-        'sourcemap': sourceMap,
-        'extend': true,
-        'banner': banner,
-        'globals': {
-            'maptalks': 'maptalks'
+        input: getEntry(),
+        external: external,
+        plugins: plugins,
+        output: {
+            format: 'umd',
+            name: 'maptalks',
+            file: `dist/${FILEMANE}.js`,
+            sourcemap: sourceMap,
+            extend: true,
+            banner: banner,
+            globals
+        }
+    },
+    {
+        input: getEntry(),
+        external: external,
+        plugins: plugins,
+        output: {
+            sourcemap: false,
+            format: 'es',
+            // banner,
+            file: `dist/${FILEMANE}.es.js`,
+            extend: true,
+            banner: banner,
+            globals
+        }
+    },
+    {
+        input: getEntry(),
+        external: external,
+        plugins: plugins.concat([terser()]),
+        output: {
+            format: 'umd',
+            name: 'maptalks',
+            file: `dist/${FILEMANE}.min.js`,
+            sourcemap: false,
+            extend: true,
+            banner: banner,
+            globals
         }
     }
 ];
-if (product) {
-    plugins.push(uglify());
-} else {
-    output.push({
-        'sourcemap': false,
-        'format': 'es',
-        'file': `dist/${FILEMANE}.es.js`,
-        'extend': true,
-        'banner': banner,
-        'globals': {
-            'maptalks': 'maptalks'
-        }
-    });
+if (!product) {
+    output = output.slice(0, 1);
 }
-
-export default {
-    input: __dirname + '/index.js',
-    plugins: plugins,
-    // sourceMap: true,
-    external: ['maptalks'],
-    output: output
-};
+export default output;
