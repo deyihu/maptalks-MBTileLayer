@@ -4,7 +4,7 @@ inspired by https://gitlab.com/IvanSanchez/Leaflet.TileLayer.MBTiles
 
 ![](gallery.png)
 
-[demo](https://deyihu.github.io/src/maptalks-MBTileLayer/examples/)
+[demo](https://deyihu.github.io/maptalks-MBTileLayer/examples/index.html)
 
 ```js
  var map = new maptalks.Map('map', {
