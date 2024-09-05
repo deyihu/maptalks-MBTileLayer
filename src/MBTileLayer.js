@@ -2,6 +2,16 @@ import { TileLayer } from 'maptalks';
 // var SphericalMercator = require('@mapbox/sphericalmercator');
 import SphericalMercator from '@mapbox/sphericalmercator';
 
+let blankImage;
+function createBlankImage() {
+	if (!blankImage) {
+		const canvas = document.createElement('canvas');
+		canvas.width = canvas.height = 256;
+		blankImage = canvas.toDataURL();
+	}
+	return blankImage;
+}
+
 const merc = new SphericalMercator({
 	size: 256
 });
@@ -23,7 +33,9 @@ function calTileRange(zoom) {
 class MBTileLayer extends TileLayer {
 	constructor(id, options) {
 		super(id, options);
-		this._initBUffer(options);
+		setTimeout(() => {
+			this._initBUffer(options);
+		}, 1);
 
 	}
 
@@ -37,20 +49,26 @@ class MBTileLayer extends TileLayer {
 			}).then(buffer => {
 				this._openDB(buffer);
 			}).catch(err => {
-				this.fire('databaseerror', { error: err });
+				this._fireErrorMessage({ error: err });
 			});
 		} else if (databaseUrl instanceof ArrayBuffer) {
 			this._openDB(databaseUrl);
 		} else {
-			this.fire('databaseerror');
+			this._fireErrorMessage();
 		}
 
 	}
 
-    /**
-     *  copy from https://gitlab.com/IvanSanchez/Leaflet.TileLayer.MBTiles
-     * @param {*} buffer
-     */
+	_fireErrorMessage(params) {
+		this.fire('dataerror', params);
+		this.fire('databaseerror', params);
+		return this;
+	}
+
+	/**
+	 *  copy from https://gitlab.com/IvanSanchez/Leaflet.TileLayer.MBTiles
+	 * @param {*} buffer
+	 */
 	_openDB(buffer) {
 		try {
 			/// This assumes the `SQL` global variable to exist!!
@@ -79,24 +97,26 @@ class MBTileLayer extends TileLayer {
 				// Fall back to PNG, hope it works.
 				this._format = 'image/png';
 			}
-
+			this._databaseIsLoaded = true;
 			// 🍂event databaseloaded
 			// Fired when the database has been loaded, parsed, and ready for queries
-			this.fire('databaseloaded');
-			this._databaseIsLoaded = true;
-			this.load();
+			this.fire('databaseloaded', {});
+			this.fire('dataload', {});
 
 		} catch (ex) {
 			// 🍂event databaseloaded
 			// Fired when the database could not load for any reason. Might contain
 			// an `error` property describing the error.
-			this.fire('databaseerror', { error: ex });
+			this._fireErrorMessage({ error: ex });
 		}
 	}
 
 	getTileUrl(x, y, z) {
-		if (!this._stmt) return undefined;
-		const tileRange = calTileRange(this.map.getZoom());
+		if (!this._stmt) {
+			console.error('The data has not been initialized. Please add it to the map after the data completion event');
+			return createBlankImage();
+		}
+		const tileRange = calTileRange(z);
 		if (tileRange && tileRange.maxY) y = tileRange.maxY - y;
 		const row = this._stmt.getAsObject({
 			':x': x,
@@ -106,7 +126,7 @@ class MBTileLayer extends TileLayer {
 		if ('tile_data' in row) {
 			return window.URL.createObjectURL(new Blob([row.tile_data], { type: 'image/png' }));
 		} else {
-			return undefined;
+			return createBlankImage();
 		}
 	}
 }
